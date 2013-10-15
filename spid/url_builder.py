@@ -1,3 +1,5 @@
+import urllib
+
 class SPiDUrlBuilder(object):
     def __init__(self, **client_config):
         self.client_config = client_config
@@ -33,3 +35,49 @@ class SPiDUrlBuilder(object):
         else:
             url = base_url_dict[name]()
         return url+path
+
+    def get_login_url(self, params={}):
+        default = {
+            'client_id'     : self.client_config.get('client_id'),
+            'response_type' : 'code',
+            'redirect_uri'  : self.client_config.get('redirect_uri'),
+            'flow'          : 'signup'
+        }
+        combined = dict(default, **params)
+        return self.get_url(path="/login")+"?"+urllib.urlencode(combined)
+
+    def get_logout_url(self, params={}):
+        default = {
+            'client_id'     : self.client_config.get('client_id'),
+            'redirect_uri'  : self.client_config.get('redirect_uri'),
+        }
+        combined = dict(default, **params)
+        return self.get_url(path="/logout")+"?"+urllib.urlencode(combined)
+
+    def get_signup_url(self, params={}):
+        default = {
+            'client_id'     : self.client_config.get('client_id'),
+            'response_type' : 'code',
+            'redirect_uri'  : self.client_config.get('redirect_uri'),
+            'flow'          : 'signup'
+        }
+        combined = dict(default, **params)
+        return self.get_url(path="/signup")+"?"+urllib.urlencode(combined)
+
+    def get_purchase_url(self, params={}):
+        default = {
+            'client_id'     : self.client_config.get('client_id'),
+            'response_type' : 'code',
+            'redirect_uri'  : self.client_config.get('redirect_uri'),
+            'flow'          : 'payment'
+        }
+        combined = dict(default, **params)
+        return self.get_url(path="/auth/start")+"?"+urllib.urlencode(combined)
+
+    def get_account_url(self, params={}):
+        default = {
+            'client_id'     : self.client_config.get('client_id'),
+            'redirect_uri'  : self.client_config.get('redirect_uri'),
+        }
+        combined = dict(default, **params)
+        return self.get_url(path="/account/summary")+"?"+urllib.urlencode(combined)

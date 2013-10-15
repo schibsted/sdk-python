@@ -18,8 +18,6 @@ class SPiDClient(object):
         "server",
         "https",
         "redirect_uri",
-        "domain",
-        "cookie",
         "api_version",
         "production"
     ]
