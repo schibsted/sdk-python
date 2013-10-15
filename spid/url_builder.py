@@ -32,6 +32,4 @@ class SPiDUrlBuilder(object):
             url = base_url_dict["default"]()
         else:
             url = base_url_dict[name]()
-        if path:
-            url = "{}/{}".format(url, path)
-        return url
+        return url+path

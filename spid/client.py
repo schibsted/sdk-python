@@ -47,13 +47,13 @@ class SPiDClient(object):
             "DELETE": self.__http_delete
         }
         default_headers = {
-            "User-Agent": "sdk-python {}".format(__version__),
+            "User-Agent": "sdk-python-{}".format(__version__),
         }
         method = method.upper()
         if not method in http_call_dict.keys():
             raise InvalidHTTPMethod(method)
 
-        kwargs["headers"] = default_headers    
+        kwargs["headers"] = default_headers
         if "headers" in kwargs.keys():
             kwargs["headers"] = dict(default_headers, **kwargs["headers"])
 
@@ -97,3 +97,6 @@ class SPiDClient(object):
             "state":         ""
         }
         return self.make_request(self.url_builder.get_url("token"), "POST", data=payload)
+
+    def api(self, path, method="GET", params={}):
+        return self.make_request(self.url_builder.get_url("api", path), method, params=params)
