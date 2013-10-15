@@ -1,8 +1,10 @@
 import requests
+from spid import __version__
 from spid.url_builder import SPiDUrlBuilder
 
 class RequiredArgumentMissing(Exception): pass
 class InvalidHTTPMethod(Exception): pass
+class SPiDAPIException(Exception): pass
 
 class SPiDClient(object):
     options = {}
@@ -29,25 +31,37 @@ class SPiDClient(object):
         self.config = dict(self.default_options, **config)
         self.url_builder = url_builder(**config)
 
-    def __http_get(self, uri, payload={}):
-        return requests.get(uri, params=payload, timeout=self.options.get("timeout"))
+    def __http_get(self, uri, params={}, **kwargs):
+        return requests.get(uri, params=params, timeout=self.options.get("timeout"), **kwargs)
 
-    def __http_post(self, uri, payload={}):
-        return requests.post(uri, data=payload, timeout=self.options.get("timeout"))
+    def __http_post(self, uri, data={}, **kwargs):
+        return requests.post(uri, data=data, timeout=self.options.get("timeout"), **kwargs)
 
-    def __http_delete(self, uri, payload={}):
-        return requests.delete(uri, params=payload, timeout=self.options.get("timeout"))
+    def __http_delete(self, uri, data={}, **kwargs):
+        return requests.delete(uri, data=data, timeout=self.options.get("timeout"), **kwargs)
 
-    def make_request(self, uri, method="GET", payload={}, ch=None):
+    def make_request(self, uri, method="GET", **kwargs):
         http_call_dict = {
             "GET":    self.__http_get,
             "POST":   self.__http_post,
             "DELETE": self.__http_delete
         }
+        default_headers = {
+            "User-Agent": "sdk-python {}".format(__version__),
+        }
         method = method.upper()
         if not method in http_call_dict.keys():
             raise InvalidHTTPMethod(method)
-        return http_call_dict[method](uri, payload=payload)
+
+        kwargs["headers"] = default_headers    
+        if "headers" in kwargs.keys():
+            kwargs["headers"] = dict(default_headers, **kwargs["headers"])
+
+        resp = http_call_dict[method](uri, **kwargs)
+        if resp.status_code > 400 and "error" in resp.json().keys():
+            raise SPiDAPIException(resp.json())
+
+        return resp
 
     def auth(self):
         payload = {
@@ -58,7 +72,7 @@ class SPiDClient(object):
             "scope":         "",
             "state":         ""
         }
-        return self.make_request(self.url_builder.get_url("token"), "POST", payload=payload)
+        return self.make_request(self.url_builder.get_url("token"), "POST", data=payload)
 
     def get_access_token(self, code):
         payload = {
@@ -70,7 +84,7 @@ class SPiDClient(object):
             "scope":         "",
             "state":         ""
         }
-        return self.make_request(self.url_builder.get_url("token"), "POST", payload=payload)
+        return self.make_request(self.url_builder.get_url("token"), "POST", data=payload)
 
     def refresh_access_token(self, refresh_token):
         payload = {
@@ -82,4 +96,4 @@ class SPiDClient(object):
             "scope":         "",
             "state":         ""
         }
-        return self.make_request(self.url_builder.get_url("token"), "POST", payload=payload)
+        return self.make_request(self.url_builder.get_url("token"), "POST", data=payload)
