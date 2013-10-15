@@ -58,7 +58,7 @@ class SPiDClient(object):
             kwargs["headers"] = dict(default_headers, **kwargs["headers"])
 
         resp = http_call_dict[method](uri, **kwargs)
-        if resp.status_code > 400 and "error" in resp.json().keys():
+        if resp.status_code >= 400 and "error" in resp.json().keys():
             raise SPiDAPIException(resp.json())
 
         return resp
