@@ -5,7 +5,7 @@ class SPiDClient(object):
         "client_id",
         "client_secret",
         "client_sign_secret",
-        "staging_domain",
+        "server",
         "https",
         "redirect_uri",
         "domain",
