@@ -33,7 +33,7 @@ class SPiDClient(object):
         self.url_builder = url_builder(**config)
 
     def make_request(self, uri, method="GET", **kwargs):
-        http_options = ["headers", "timeout"]
+        http_options = ["headers", "timeout", "proxies"]
         for option in http_options:
             if option in self.config and option not in kwargs:
                 kwargs[option] = self.config[option]
