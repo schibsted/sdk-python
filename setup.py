@@ -15,6 +15,6 @@ setup(name="spid",
     author="SPiD",
     author_email="support@schibstedpayment.no",
     url="https://github.com/schibsted/sdk-python",
-    packages=find_packages(exclude=['tests']),
+    packages=find_packages(exclude=['tests', 'examples']),
     keywords="spid library",
     zip_safe=True)
