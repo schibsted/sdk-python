@@ -1,15 +1,17 @@
-import requests
 from spid import __version__
 from spid.url_builder import SPiDUrlBuilder
+from spid.http import RequestsClient
 
 class RequiredArgumentMissing(Exception): pass
-class InvalidHTTPMethod(Exception): pass
 class SPiDAPIException(Exception): pass
 
 class SPiDClient(object):
-    options = {}
+    config = {}
     default_options = {
-        "timeout": 5.0
+        "timeout": 5.0,
+        "headers": {
+            "User-Agent": "sdk-python-{}".format(__version__)
+        }
     }
     required_args = [
         "client_id",
@@ -22,40 +24,22 @@ class SPiDClient(object):
         "production"
     ]
 
-    def __init__(self, url_builder=SPiDUrlBuilder, **config):
+    def __init__(self, url_builder=SPiDUrlBuilder, http_client=RequestsClient, **config):
         for argument in self.required_args:
             if not argument in config.keys():
                 raise RequiredArgumentMissing(argument)
         self.config = dict(self.default_options, **config)
+        self.http_client = http_client()
         self.url_builder = url_builder(**config)
 
-    def __http_get(self, uri, params={}, **kwargs):
-        return requests.get(uri, params=params, timeout=self.options.get("timeout"), **kwargs)
-
-    def __http_post(self, uri, data={}, **kwargs):
-        return requests.post(uri, data=data, timeout=self.options.get("timeout"), **kwargs)
-
-    def __http_delete(self, uri, data={}, **kwargs):
-        return requests.delete(uri, data=data, timeout=self.options.get("timeout"), **kwargs)
-
     def make_request(self, uri, method="GET", **kwargs):
-        http_call_dict = {
-            "GET":    self.__http_get,
-            "POST":   self.__http_post,
-            "DELETE": self.__http_delete
-        }
-        default_headers = {
-            "User-Agent": "sdk-python-{}".format(__version__),
-        }
-        method = method.upper()
-        if not method in http_call_dict.keys():
-            raise InvalidHTTPMethod(method)
+        http_options = ["headers", "timeout", "proxies"]
+        for option in http_options:
+            if option in self.config and option not in kwargs:
+                kwargs[option] = self.config[option]
 
-        kwargs["headers"] = default_headers
-        if "headers" in kwargs.keys():
-            kwargs["headers"] = dict(default_headers, **kwargs["headers"])
+        resp = self.http_client.dispatch(uri, method, **kwargs)
 
-        resp = http_call_dict[method](uri, **kwargs)
         if resp.status_code >= 400 and "error" in resp.json().keys():
             raise SPiDAPIException(resp.json())
 
