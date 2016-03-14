@@ -40,11 +40,10 @@ class SPiDUrlBuilder(object):
         default = {
             'client_id'     : self.client_config.get('client_id'),
             'response_type' : 'code',
-            'redirect_uri'  : self.client_config.get('redirect_uri'),
-            'flow'          : 'signup'
+            'redirect_uri'  : self.client_config.get('redirect_uri')
         }
         combined = dict(default, **params)
-        return self.get_url(path="/login")+"?"+urllib.urlencode(combined)
+        return self.get_url(path="/flow/login")+"?"+urllib.urlencode(combined)
 
     def get_logout_url(self, params={}):
         default = {
@@ -58,11 +57,19 @@ class SPiDUrlBuilder(object):
         default = {
             'client_id'     : self.client_config.get('client_id'),
             'response_type' : 'code',
-            'redirect_uri'  : self.client_config.get('redirect_uri'),
-            'flow'          : 'signup'
+            'redirect_uri'  : self.client_config.get('redirect_uri')
         }
         combined = dict(default, **params)
-        return self.get_url(path="/signup")+"?"+urllib.urlencode(combined)
+        return self.get_url(path="/flow/signup")+"?"+urllib.urlencode(combined)
+
+    def get_auth_url(self, params={}):
+        default = {
+            'client_id'     : self.client_config.get('client_id'),
+            'response_type' : 'code',
+            'redirect_uri'  : self.client_config.get('redirect_uri'),
+        }
+        combined = dict(default, **params)
+        return self.get_url(path="/flow/auth")+"?"+urllib.urlencode(combined)
 
     def get_purchase_url(self, params={}):
         default = {
@@ -72,7 +79,7 @@ class SPiDUrlBuilder(object):
             'flow'          : 'payment'
         }
         combined = dict(default, **params)
-        return self.get_url(path="/auth/start")+"?"+urllib.urlencode(combined)
+        return self.get_url(path="/flow/checkout")+"?"+urllib.urlencode(combined)
 
     def get_account_url(self, params={}):
         default = {
