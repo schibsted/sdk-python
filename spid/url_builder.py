@@ -71,12 +71,12 @@ class SPiDUrlBuilder(object):
         combined = dict(default, **params)
         return self.get_url(path="/flow/auth")+"?"+urllib.urlencode(combined)
 
-    def get_payment_url(self, params={}):
+    def get_purchase_url(self, params={}):
         default = {
             'client_id'     : self.client_config.get('client_id'),
             'response_type' : 'code',
             'redirect_uri'  : self.client_config.get('redirect_uri'),
-            'flow': 'payment'
+            'flow'          : 'payment'
         }
         combined = dict(default, **params)
         return self.get_url(path="/flow/checkout")+"?"+urllib.urlencode(combined)
